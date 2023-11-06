@@ -1,1 +1,24 @@
 https://github.com/MithunTechnologiesDevOps/metrics-server
+
+For Replicaset in Stateful for Mongo App
+Go to one of the containers in mongo db
+Link for tutorial https://www.mongodb.com/docs/manual/tutorial/deploy-replica-set/
+user "hostname -f" command
+"mongosh" command
+rs.initiate( {
+   _id : "replicaSet0",
+   members: [
+      { _id: 0, host: "mongostatedb-0.mongostate-svc.default.svc.cluster.local:27017" },
+      { _id: 1, host: "mongostatedb-1.mongostate-svc.default.svc.cluster.local:27017" },
+      { _id: 2, host: "mongostatedb-2.mongostate-svc.default.svc.cluster.local:27017" }
+   ]
+})
+
+https://www.mongodb.com/docs/v2.6/tutorial/deploy-replica-set-with-auth/
+db.createUser( {
+    user: "dev",
+    pwd: "pass@123",
+    roles: [ { role: "root", db: "admin" } ]
+  });
+
+  db.getSiblingDB("admin").createUser({user:"dev",pwd: "pass@123", roles: [{role: "root", db: "admin"}]});

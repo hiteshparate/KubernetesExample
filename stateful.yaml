@@ -1,0 +1,56 @@
+# Create StetfulSet using mongo database and changing container command to support replicaset mode in Mongo
+# Creating headless service for statefulset by giving Cluster Ip= None
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongostatedb
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  serviceName: mongostate-svc
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo
+          ports:
+            - containerPort: 27017 # Default port for mongo
+          volumeMounts:
+            - name: mongovol # Use same name as VolumeClaim Name in metadata
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: 1
+              memory: 512Mi
+
+          command: # This is the command to change the mode to replicaset in Mongo
+            - "mongod"
+            - "--replSet"
+            - "replicaSet0" # Use this in _id column of mongo container in rs.initiate() inside mongo container
+            - "--bind_ip"
+            - "0.0.0.0"
+  volumeClaimTemplates:
+    - metadata:
+        name: mongovol
+      spec:
+        accessModes: ["ReadWriteMany"]
+        resources:
+          requests:
+            storage: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongostate-svc
+spec:
+  clusterIP: "None"
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
