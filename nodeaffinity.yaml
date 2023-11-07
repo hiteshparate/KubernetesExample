@@ -1,0 +1,37 @@
+# Node affinity example with preferred rules.
+# preferred rules will schedule pods to node with conditions, however no conditions met then it will schedule to another node
+# In required rules, pods have to met condition to nodes otherwise pods will not be scheduled and they will be in pending state
+# weight is between 1 and 100, which rule has higher wait preference will be given to that rule
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeaffinity
+spec:
+  selector:
+    matchLabels:
+      app: nodeaffinity
+  template:
+    metadata:
+      labels:
+        app: nodeaffinity
+    spec:
+      containers:
+        - name: nodeaffinity
+          image: httpd
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 80
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: diskType
+                    operator: In
+                    values:
+                      - "ssd"
+              weight: 1
